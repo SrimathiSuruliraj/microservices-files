@@ -1,0 +1,57 @@
+Proxy Code:
+1.Customer Service Proxy:
+@FeignClient(name="customer-service-app")
+public interface CustomerServiceProxy {
+    @GetMapping("/customers")
+    public List<Customer> getCustomers();    
+    @GetMapping("/customer/{customerId}")
+    public Customer getCustomer(@PathVariable("customerId") String customerId);
+    @PostMapping("/addCustomer")
+    public ResponseEntity<Customer> addCustomer(@RequestBody Customer customer);
+    @PutMapping("/customer/{customerId}")
+    public void updateCustomer(@PathVariable("customerId") String customerId,@RequestBody Customer customer);
+}
+
+Cart Proxy
+@FeignClient(name="cart-service-app")
+public interface CartServiceProxy {
+    @PostMapping("/customer/{customerId}/addToCart")
+    public ResponseEntity<Cart> addToCart(@PathVariable("customerId") String customerId,@RequestBody Cart cart);
+    @PostMapping("/customer/{customerId}/cart/{cartId}/product/{productId}")
+    public ResponseEntity<Cart> addToCart(@PathVariable("customerId") String customerId,@PathVariable("cartId") String cartId,@PathVariable("productId") String productId,@RequestBody Cart cart);
+    @GetMapping("/carts")
+    public List<Cart> getCarts();
+}
+
+Oredre proxy:
+@FeignClient(name="order-service-app")
+public interface OrderServiceProxy {
+    
+    @PostMapping("/customer/{customerId}/cart/{cartId}/placeOrder")
+    public ResponseEntity<Order> placeOrder(@PathVariable("customerId") String customerId,@PathVariable("cartId") String cartId,@RequestBody Order order);
+    @PutMapping("/customer/{customerId}/order/{orderId}/updateOrder")
+    public Order updateOrder(@PathVariable("customerId") String customerId,@PathVariable("orderId") String orderId,@RequestBody Order order);
+    @GetMapping("/orders")
+    public List<Order> getOrders();
+}
+
+Product Proxy:
+@FeignClient(name="product-catalog-service-app")
+public interface ProductServiceProxy {
+    @GetMapping("/products")
+    public List<Product> getProducts();
+    @GetMapping("/product/{productId}")
+    public Product getProduct(@PathVariable("productId") String productId);
+}
+
+In main class:
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableFeignClients("com.composite.compositems")
+
+app.props:
+server.port=10000
+spring.application.name=composite-mcs
+eureka.client.fetch-registry=true
+eureka.client.service-url.defaultZone=http://localhost:8761/eureka
+logging.level.root=debug
